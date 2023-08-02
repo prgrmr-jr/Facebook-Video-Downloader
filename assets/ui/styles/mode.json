@@ -1,0 +1,42 @@
+[
+  {
+    "name": "container-dark",
+    "content": "background: #18191A;"
+  },
+  {
+    "name": "lblTitle-dark",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap');\n\n#lblTitle{\n    background:transparent;\n    color: #FFFFFF;\n    font-family: 'Poppins', sans-serif;\n    font-weight:900;\n    font-size: 36px;\n    font-style: normal;\n    line-height: normal;\n}"
+  },
+  {
+    "name": "lblNote-dark",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');\n\n#lblNote{\n    background:transparent;\n    color: #FFFFFF;\n    font-family: 'Poppins', sans-serif;\n    font-size: 12px;\n    font-style: normal;\n    font-weight: 400;\n    line-height: normal;\n}"
+  },
+  {
+    "name": "inputLink-dark",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');\n\n#inputLink{\n    border-radius: 8px;\n    border: 1px solid #D4D4D4;\n    background: #FFFFFF;\n    color: #000000;\n    font-family: 'Poppins', sans-serif;\n    font-size: 12px;\n    font-style: normal;\n    font-weight: 400;\n    line-height: normal;\n    padding-left: 5px;\n}"
+  },
+  {
+    "name": "lblNote_2-dark",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');\n\n#lblNote_2{\n    color: #FFFFFF;\n    font-family: 'Poppins', sans-serif;\n    font-size: 12px;\n    font-style: normal;\n    font-weight: 400;\n    line-height: normal;\n}"
+  },
+  {
+    "name": "container-light",
+    "content": "background: #FFFFFF;"
+  },
+  {
+    "name": "lblTitle-light",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap');\n\n#lblTitle{\n    background:transparent;\n    color: #626262;\n    font-family: 'Poppins', sans-serif;\n    font-weight:900;\n    font-size: 36px;\n    font-style: normal;\n    line-height: normal;\n}"
+  },
+  {
+    "name": "lblNote-light",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');\n\n#lblNote{\n    background:transparent;\n    color: #6F6F6F;\n    font-family: 'Poppins', sans-serif;\n    font-size: 12px;\n    font-style: normal;\n    font-weight: 400;\n    line-height: normal;\n}"
+  },
+  {
+    "name": "inputLink-light",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');\n\n#inputLink{\n    border-radius: 8px;\n    border: 1px solid #D4D4D4;\n    background: #EFEFEF;\n    color: #000000;\n    font-family: 'Poppins', sans-serif;\n    font-size: 12px;\n    font-style: normal;\n    font-weight: 400;\n    line-height: normal;\n    padding-left: 5px;\n}"
+  },
+  {
+    "name": "lblNote_2-light",
+    "content": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap');\n\n#lblNote_2{\n    color: #111111;\n    font-family: 'Poppins', sans-serif;\n    font-size: 12px;\n    font-style: normal;\n    font-weight: 400;\n    line-height: normal;\n}"
+  }
+]

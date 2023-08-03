@@ -9,10 +9,12 @@
 
 import json
 import os
+import shutil
 import webbrowser
 import subprocess
 import sys
 import re
+import requests
 import youtube_dl
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QFileDialog
@@ -31,7 +33,7 @@ class FacebookDownloader(QWidget):
             # create a tray icon
             self.tray_icon = QSystemTrayIcon(self)
             self.tray_icon.setIcon(QIcon("./assets/images/icon_logo.png"))  # Load your custom image here
-            self.tray_icon.setToolTip('YouTube Downloader')
+            self.tray_icon.setToolTip('Facebook Video Downloader')
             self.tray_icon.activated.connect(self.on_tray_icon_activated)
 
             self.tray_icon.show()
@@ -49,6 +51,19 @@ class FacebookDownloader(QWidget):
             self.btnGithub.clicked.connect(self.open_github)
             self.btnYoutube.clicked.connect(self.open_youtube)
             self.btnMode.clicked.connect(self.change_mode)
+
+            # get styles
+            containerStyle = self.get_content_by_name('container-light')
+            titleStyle = self.get_content_by_name('lblTitle-light')
+            noteStyle = self.get_content_by_name('lblNote-light')
+            inputLinkStyle = self.get_content_by_name('inputLink-light')
+            lblNote2Style = self.get_content_by_name('lblNote_2-light')
+            self.container.setStyleSheet(str(containerStyle))
+            self.lblTitle.setStyleSheet(str(titleStyle))
+            self.lblNote.setStyleSheet(str(noteStyle))
+            self.inputLink.setStyleSheet(str(inputLinkStyle))
+            self.lblNote_2.setStyleSheet(str(lblNote2Style))
+
 
         except Exception as e:
             print("Error:", e)
@@ -126,121 +141,111 @@ class FacebookDownloader(QWidget):
     # Search Video
     def search_video(self):
         video_url = self.inputLink.text()
-        if video_url == "":
-            self.errorMessage.setText("Please enter link in the box.")
-            self.errorMessage.setVisible(True)
-            self.unshow_items()
-            return
-        self.errorMessage.setVisible(False)
-        try:
-            ydl_opts = {
-                'quiet': True,
-                'simulate': True,
-            }
-
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                try:
-                    info_dict = ydl.extract_info(video_url, download=False)
-                    if info_dict.get('entries'):
-                        self.errorMessage.setVisible(False)
-                        self.imgThumbnail.setVisible(True)
-                        self.btnDownload.setVisible(True)
-                        self.lblNote_2.setVisible(True)
-                    else:
-                        self.errorMessage.setText("Please enter a valid URL.")
-                        self.errorMessage.setVisible(True)
-                        self.unshow_items()
-                except Exception as e:
-                    self.errorMessage.setText("Please enter a valid URL.")
-                    self.errorMessage.setVisible(True)
-                    self.unshow_items()
-
-        except Exception as e:
-            print("Error:", e)
-
-    # Download Video
-    def download_facebook_video(self):
-        video_url = self.inputLink.text()
-        if video_url == "":
-            self.errorMessage.setText("Please enter link in the box.")
-            self.errorMessage.setVisible(True)
-            self.unshow_items()
-            return
-        self.errorMessage.setVisible(False)
-        try:
-            ydl_opts = {
-                'quiet': True,
-                'simulate': True,
-            }
-
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                try:
-                    info_dict = ydl.extract_info(video_url, download=False)
-                    # get video id
-                    video_id = info_dict.get('id', None)
-                    match = re.search(r'facebook\.com/([^/]+)', video_url)
-                    name = match.group(1)
-                    if 'watch' in name:
-                        name = 'facebookvideo'
-
-                    if info_dict.get('entries'):
-
-                        save_location, _ = QFileDialog.getSaveFileName(self, 'Save Audio', name + video_id,
-                                                                       'Audio Files (*.mp4)')
-                        if save_location:
-                            self.download_start_message()
-                            self.remove_temp_files()
-                            ydl_opts1 = {
-                                'format': 'bestvideo/best',
-                                'outtmpl': './assets/temp/video_temp.mp4',
-                            }
-
-                            with youtube_dl.YoutubeDL(ydl_opts1) as ydl:
-                                try:
-                                    info_dict = ydl.extract_info(video_url, download=False)
-                                    video_title = info_dict.get('title', 'video')
-                                    uploader = info_dict.get('uploader', 'unknown')
-                                    print(f"Downloading video: {video_title} by {uploader}")
-                                    ydl.download([video_url])
-                                except Exception as e:
-                                    print("Error:", e)
-
-                            ydl_opts2 = {
-                                'format': 'bestaudio/best',
-                                'outtmpl': './assets/temp/audio_temp.mp3',
-                            }
-                            with youtube_dl.YoutubeDL(ydl_opts2) as ydl1:
-                                try:
-                                    ydl1.download([video_url])
-                                except Exception as e:
-                                    print("Error:", e)
-
-                            video_path = "./assets/temp/video_temp.mp4"
-                            audio_path = "./assets/temp/audio_temp.mp3"
-
-                            ffmpeg_path = "./assets/tools/ffmpeg.exe"
-                            ffmpeg_cmd = f'"{ffmpeg_path}" -i "{video_path}" -i "{audio_path}" -c:v copy -c:a aac "{save_location}"'
-                            self.tray_icon.showMessage('Facebook Video Downloader',
-                                                       'Processing your Video Please Wait....',
-                                                       QSystemTrayIcon.Information, 1000)
-                            print("Merging audio and video files...")
-                            subprocess.run(ffmpeg_cmd, shell=True)
-                            self.remove_temp_files()
-                            self.download_complete_message()
-                    else:
-                        self.errorMessage.setText("Please enter a valid URL.")
-                        self.errorMessage.setVisible(True)
-                        self.unshow_items()
-                except Exception as e:
-                    self.errorMessage.setVisible(True)
-                    self.errorMessage.setText("Please enter a valid URL.")
-                    self.unshow_items()
-
-        except Exception as e:
+        if not video_url:
             self.errorMessage.setVisible(True)
             self.errorMessage.setText("Please enter a valid URL.")
+            return
 
-    # remove temp files
+        try:
+            response = requests.get(video_url)
+            if response.status_code == 200:
+                self.errorMessage.setVisible(False)
+                self.imgThumbnail.setVisible(True)
+                self.btnDownload.setVisible(True)
+                self.lblNote_2.setVisible(True)
+            else:
+                self.errorMessage.setVisible(True)
+                self.errorMessage.setText("Please enter a valid URL.")
+                self.unshow_items()
+
+        except Exception as e:
+            self.errorMessage.setVisible(True)
+            self.errorMessage.setText("Invalid Link URL.")
+            print("Error:", e)
+
+    def download_temp_audio(self, video_url):
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': './assets/temp/audio_temp.mp3',
+            'quiet': True,
+            'no_warnings': True,
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            try:
+                ydl.download([video_url])
+            except youtube_dl.DownloadError as e:
+                print("Error:", e)
+
+    def download_temp_video(self, video_url):
+        ydl_opts = {
+            'format': 'bestvideo/best',
+            'outtmpl': './assets/temp/video_temp.mp4',
+            'quiet': True,
+            'no_warnings': True,
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            try:
+                ydl.download([video_url])
+            except youtube_dl.DownloadError as e:
+                print("Error:", e)
+
+    # Download merge Video
+    def download_facebook_video(self):
+        video_url = self.inputLink.text()
+        if 'fb.watch' in video_url:
+            response = requests.get(video_url, allow_redirects=True)
+            video_url = response.url
+
+        video_id_match = re.search(r'v=(\d+)', video_url)
+        video_name_match = re.search(r'/([^/]+)/videos/', video_url)
+        print(video_url)
+        if "fb.watch" in video_url:
+            video_id_match = re.search(r'\/([a-zA-Z0-9_-]+)\/?$', video_url)
+
+        if video_id_match:
+            video_id = video_id_match.group(1)
+        else:
+            video_id = None
+
+        if video_name_match:
+            video_name = video_name_match.group(1)
+            if video_id is None:
+                video_id = video_url.split('/')[-2]
+        else:
+            # If the name pattern doesn't match, fallback to a default name
+            video_name = 'facebookvideo'
+
+        save_location, _ = QFileDialog.getSaveFileName(self, 'Save Audio', video_name + '_' + str(video_id),
+                                                       'Audio Files (*.mp4)')
+        if save_location:
+            self.remove_temp_files()
+            self.download_start_message()
+
+            self.download_temp_audio(video_url)
+            self.download_temp_video(video_url)
+
+            video_path = "./assets/temp/video_temp.mp4"
+            audio_path = "./assets/temp/audio_temp.mp3"
+
+            if video_path and audio_path:
+                ffmpeg_path = "./assets/tools/ffmpeg.exe"
+                ffmpeg_cmd = f'"{ffmpeg_path}" -i "{video_path}" -i "{audio_path}" -c:v copy -c:a aac "{save_location}"'
+
+                self.tray_icon.showMessage('Facebook Video Downloader', 'Processing Video Please Wait....',
+                                           QSystemTrayIcon.Information, 3000)
+                subprocess.run(ffmpeg_cmd, shell=True)
+                self.download_complete_message()
+            else:
+                self.errorMessage.setVisible(True)
+                self.errorMessage.setText("No Video Found.")
+                self.unshow_items()
+
+        self.remove_temp_files()
+        self.unshow_items()
+
+    # Remove Temp Files
     def remove_temp_files(self):
         if os.path.exists("./assets/temp/video_temp.mp4"):
             os.remove("./assets/temp/video_temp.mp4")
